@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         HyperBullet Lichess Bot
-// @description  Super fast bot
+// @name         Lichess Bot
+// @description  Fully automated lichess bot
 // @author       NuroC, t0gepi
 // @match         *://lichess.org/*
 // @run-at        document-start
