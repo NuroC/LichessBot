@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Lichess Bot
-// @description  Fully automated lichess bot
-// @author       Nuro
+// @name         HyperBullet Lichess Bot
+// @description  Super fast bot
+// @author       NuroC, t0gepi
 // @match         *://lichess.org/*
 // @run-at        document-start
 // @grant         none
@@ -9,7 +9,7 @@
 // ==/UserScript==
 
 let chessEngine;
-let currentFen = "";
+let moves = [];
 let bestMove;
 let webSocketWrapper = null;
 
@@ -27,16 +27,18 @@ function interceptWebSocket() {
             wrappedWebSocket.addEventListener("message", function (event) {
                 let message = JSON.parse(event.data);
                 console.log(message)
-                if (message.d && typeof message.d.fen === "string" && typeof message.v === "number") {
-                    currentFen = message.d.fen;
-
-                    let isWhitesTurn = message.v % 2 == 0;
-                    if (isWhitesTurn) {
-                        currentFen += " w";
-                    } else {
-                        currentFen += " b";
+                if (message.d && typeof message.d.fen === "string") {
+                    if(message.t && message.t == "move" && message.d.uci) {
+                        if(message.d.castle) {
+                            moves.push(message.d.castle.king[0] + message.d.castle.king[1]);
+                        }
+                        else{
+                            moves.push(message.d.uci);
+                        }
                     }
-                    calculateMove();
+                    if(typeof message.v === "number") {
+                        calculateMove();
+                    }
                 }
             });
             return wrappedWebSocket;
@@ -47,8 +49,8 @@ function interceptWebSocket() {
 }
 
 function calculateMove() {
-    chessEngine.postMessage("position fen " + currentFen);
-    chessEngine.postMessage("go depth 1");
+    chessEngine.postMessage("position startpos moves " + moves.join(' '));
+    chessEngine.postMessage("go depth 6");
 }
 
 function setupChessEngineOnMessage() {
