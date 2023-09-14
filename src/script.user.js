@@ -26,14 +26,17 @@ function interceptWebSocket() {
 
             wrappedWebSocket.addEventListener("message", function (event) {
                 let message = JSON.parse(event.data);
-                console.log(message)
                 if (message.d && typeof message.d.fen === "string") {
                     if(message.t && message.t == "move" && message.d.uci) {
                         if(message.d.castle) {
                             moves.push(message.d.castle.king[0] + message.d.castle.king[1]);
                         }
                         else{
-                            moves.push(message.d.uci);
+                            let move = message.d.uci;
+                            if(message.d.san.includes("=")) {
+                               move += message.d.san.split("=")[1].charAt(0).toLowerCase();
+                            }
+                            moves.push(move);
                         }
                     }
                     if(typeof message.v === "number") {
@@ -50,7 +53,7 @@ function interceptWebSocket() {
 
 function calculateMove() {
     chessEngine.postMessage("position startpos moves " + moves.join(' '));
-    chessEngine.postMessage("go depth 6");
+    chessEngine.postMessage("go depth 13");
 }
 
 function setupChessEngineOnMessage() {
